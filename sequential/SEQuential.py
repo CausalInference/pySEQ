@@ -1,8 +1,13 @@
-from typing import Optional, List, Dict
+from typing import Optional, List
+import sys
 import polars as pl
-from .SEQexpand import SEQ as SEQexpand
+from .SEQopts import SEQopts
+from .initialization import __outcome, __numerator, __denominator, __censor_numerator, __censor_denominator
+from .expansion import __mapper, __binder, __dynamic, __randomSelection
+from .weighting import __weight_prepare_date, __weight_model, __weight_predict, __weight_bind, __weight_cumprod
 
-class SEQ(SEQexpand):
+
+class SEQuential:
     def __init__(
             self,
             data: pl.DataFrame,
@@ -14,84 +19,64 @@ class SEQ(SEQexpand):
             time_varying_cols: Optional[List[str]] = None,
             fixed_cols: Optional[List[str]] = None,
             method: str = "ITT",
-            weighted: bool = False,
-            pre_expansion: bool = False,
-            bootstrap: bool = False,
-            nboot: int = 100,
-            parallel: bool = False,
-            ncores: int = 1,
-            include_period: bool = True,
-            include_trial: bool = False,
-            compevent: Optional[str] = None,
-            excused: bool = False,
-            excused_col1: Optional[str] = None,
-            excused_col0: Optional[str] = None,
-            cense: Optional[str] = None,
-            max_followup: float = float('inf'),
-            max_survival: float = float('inf'),
-            seed: int = 1636,
-            km_curves: bool = False,
-            covariates: Optional[str] = None,
-            numerator: Optional[str] = None,
-            denominator: Optional[str] = None,
-            ltfu_denominator: Optional[str] = None,
-            ltfu_numerator: Optional[str] = None,
-            baseline_indicator: Optional[str] = "_bas",
-            squared_indicator: Optional[str] = "_sq"
-            ):
+            parameters: dict = SEQopts()):
         
-        self.data = data,
-        self.id_col = id_col,
-        self.time_col = time_col,
-        self.eligible_col = eligible_col,
-        self.treatment_col = treatment_col,
-        self.outcome_col = outcome_col,
-        self.time_varying_cols = time_varying_cols,
-        self.fixed_cols = fixed_cols,
-        self.method = method,
-        self.weighted = weighted,
-        self.pre_expansion = pre_expansion,
-        self.bootstrap = bootstrap,
-        self.nboot = nboot,
-        self.bootstrap = bootstrap,
-        self.nboot = nboot,
-        self.parallel = parallel,
-        self.ncores = ncores,
-        self.include_period = include_period,
-        self.include_trial = include_trial,
-        self.compevent = compevent,
-        self.excused = excused,
-        self.excused_col0 = excused_col0,
-        self.excused_col1 = excused_col1,
-        self.cense = cense,
-        self.max_followup = max_followup,
-        self.max_survival = max_survival,
-        self.seed = seed,
-        self.km_curves = km_curves,
-        self.covariates = covariates,
-        self.numerator = numerator,
-        self.denominator = denominator,
-        self.ltfu_numerator = ltfu_numerator,
-        self.ltfu_denominator = ltfu_denominator,
-        self.baseline_indicator = baseline_indicator,
-        self.squared_indicator = squared_indicator
+        self.data = data
+        self.id_col = id_col
+        self.time_col = time_col
+        self.eligible_col = eligible_col
+        self.treatment_col = treatment_col
+        self.outcome_col = outcome_col
+        self.time_varying_cols = time_varying_cols
+        self.fixed_cols = fixed_cols
+        self.method = method
+        self.weighted = parameters['weighted']
+        self.censor = parameters['censor']
+        self.random_selection = parameters['random_selection']
+        self.parameters = parameters
 
-        self._validate_inputs()
-    
-    def _validate_inputs(self):
-        """Validate the inputs to ensure required columns and method are provided."""
-        required_columns = [
-            self.id_col,
-            self.time_col,
-            self.eligible_col,
-            self.treatment_col,
-            self.outcome_col,
-        ] + self.time_varying_cols + self.fixed_cols
-        missing_columns = [col for col in required_columns if col not in self.data.columns]
-        if missing_columns:
-            raise ValueError(f"Missing columns in data: {', '.join(missing_columns)}")
+        if parameters['covariates'] is None:
+            self.covariates = __outcome()
+        else: self.covariates = parameters['covariates']
 
-        if self.method not in {"ITT", "dose-response", "censoring"}:
-            raise ValueError(
-                f"Unsupported method '{self.method}'. Supported methods: 'ITT', 'dose-response', 'censoring'."
-            )
+        if self.weighted:
+            if parameters['numerator'] is None:
+                self.numerator = __numerator()
+            else: self.numerator = parameters['numerator']
+
+            if parameters['denominator'] is None:
+                self.denominator = __denominator()
+            else: self.denominator = parameters['denominator']
+
+            if self.censor is not None:
+                if self.parameters['censor_numerator'] is None:
+                    self.cense_numerator = __censor_numerator()
+                else: self.cense_numerator = self.parameters['censor_numerator']
+
+                if parameters['censor_denominator'] is None:
+                    self.cense_denominator = __censor_denominator()
+                else: self.censor_denominator = parameters['censor_denominator']
+
+    def expand(self):
+        self.DT = __binder(__mapper(self.data))
+        if self.method != "ITT":
+            self.DT = __dynamic(self.DT)
+        if self.random_selection:
+            self.DT = __randomSelection(self.DT)
+
+    def weight(self):
+        if not self.weighted: 
+            sys.exit("""No planned weighting initialized, 
+                     consider adding weighted=True in your parameter dictionary""")
+        # for level in treatment level do
+        # data creation - subset data to where the baseline is level
+        # modeling - model from the data and covariates
+        # predition - predict on the data the odds for adherence 
+        # anti-prediction - where there is no adherence, 1- prediction
+        # next
+        
+            
+    def outcome():
+
+
+
