@@ -2,6 +2,7 @@ from typing import Optional, List
 import sys
 import polars as pl
 from .SEQopts import SEQopts
+from .helpers import __colString
 from .initialization import __outcome, __numerator, __denominator, __censor_numerator, __censor_denominator
 from .expansion import __mapper, __binder, __dynamic, __randomSelection
 from .weighting import __weight_prepare_data, __weight_model, __weight_predict, __weight_bind, __weight_cumprod
@@ -35,7 +36,8 @@ class SEQuential:
         self.weighted = parameters['weighted']
         self.censor = parameters['censor']
         self.random_selection = parameters['random_selection']
-        self.parameters = parameters
+        self.baseline_indicator = parameters['indicator_baseline']
+        self.squared_indicator = parameters['indicator_squared']
 
         if parameters['covariates'] is None:
             self.covariates = __outcome()
@@ -52,15 +54,18 @@ class SEQuential:
 
             if self.censor is not None:
                 if self.parameters['censor_numerator'] is None:
-                    self.cense_numerator = __censor_numerator()
-                else: self.cense_numerator = self.parameters['censor_numerator']
+                    self.censor_numerator = __censor_numerator()
+                else: self.censor_numerator = self.parameters['censor_numerator']
 
                 if parameters['censor_denominator'] is None:
-                    self.cense_denominator = __censor_denominator()
+                    self.cenor_denominator = __censor_denominator()
                 else: self.censor_denominator = parameters['censor_denominator']
 
     def expand(self):
-        self.DT = __binder(__mapper(self.data))
+        self.DT = __binder(__mapper(self.data), self.data, __colString([
+            self.covariates, self.numerator, self.denominator, self.censor_numerator, self.censor_denominator
+            ]), self.baseline_indicator, self.squared_indicator)
+        
         if self.method != "ITT":
             self.DT = __dynamic(self.DT)
         if self.random_selection:
@@ -79,6 +84,7 @@ class SEQuential:
         
             
     def outcome():
+        pass
 
     def survival():
         pass
