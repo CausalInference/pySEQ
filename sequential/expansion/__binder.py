@@ -19,9 +19,9 @@ def __binder(DT, data, id_col, time_col,
     squared = {col for col in cols if squared_indicator in col and col not in excluded}
     
     DT = DT.join(
-        data.select([time_col] + list(regular)),
-        left_on=['period'],
-        right_on=[time_col],
+        data.select([id_col, time_col] + list(regular)),
+        left_on=[id_col, 'period'],
+        right_on=[id_col, time_col],
         how='left'
     )
 
@@ -33,12 +33,14 @@ def __binder(DT, data, id_col, time_col,
             )
     
     if baseline:
-        base_cols = [bas.replace(baseline_indicator, '') for bas in baseline]
-        
-        baseline_df = DT.group_by([id_col, "trial"]).agg(
-            [pl.col(col).first().alias(f"{col}{baseline_indicator}") for col in base_cols]
-        )
+        base = [bas.replace(baseline_indicator, '') for bas in baseline] + [eligible_col]
 
-        DT = DT.join(baseline_df, on=[id_col, "trial"], how='left')
+        for col in base:
+            DT = DT.with_columns(
+                pl.col(col).over([id_col, 'trial']).first().alias(f"{col}{baseline_indicator}")
+            )
+    
+    DT = DT.filter(pl.col(f"{eligible_col}{baseline_indicator}") == 1) \
+    .drop([f"{eligible_col}{baseline_indicator}", eligible_col])         
     
     return DT
