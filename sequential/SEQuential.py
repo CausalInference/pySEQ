@@ -1,9 +1,10 @@
 from typing import Optional, List
 import sys
+from dataclasses import field, asdict
 import polars as pl
 from .SEQopts import SEQopts
 from .helpers import __colString
-from .initialization import __outcome, __numerator, __denominator, __censor_numerator, __censor_denominator
+from .initialization import __outcome, __numerator, __denominator, __cense_numerator, __cense_denominator
 from .expansion import __mapper, __binder, __dynamic, __randomSelection
 from .weighting import __weight_prepare_data, __weight_model, __weight_predict, __weight_bind, __weight_cumprod
 from .analysis import __outcome_predict, __survival_prepare_data, __survival_predict
@@ -22,8 +23,8 @@ class SEQuential:
             time_varying_cols: Optional[List[str]] = None,
             fixed_cols: Optional[List[str]] = None,
             method: str = "ITT",
-            parameters: dict = SEQopts()):
-        
+            parameters: SEQopts = field(default_factory=SEQopts)
+    ):
         self.data = data
         self.id_col = id_col
         self.time_col = time_col
@@ -33,45 +34,38 @@ class SEQuential:
         self.time_varying_cols = time_varying_cols
         self.fixed_cols = fixed_cols
         self.method = method
-        self.weighted = parameters['weighted']
-        self.censor = parameters['censor']
-        self.random_selection = parameters['random_selection']
-        self.baseline_indicator = parameters['indicator_baseline']
-        self.squared_indicator = parameters['indicator_squared']
-        self.excused_col0 = parameters['excused_col0']
-        self.excused_col1 = parameters['excused_col1']
-
-        if parameters['covariates'] is None:
-            self.covariates = __outcome()
-        else: self.covariates = parameters['covariates']
+        
+        # Absorb parameters from SEQopts dataclass
+        for name, value in asdict(parameters).items():
+            setattr(self, name, value)
+        
+        # Create default covariates
+        if self.covariates is None:
+            self.covariates = __outcome(self)
 
         if self.weighted:
-            if parameters['numerator'] is None:
-                self.numerator = __numerator()
-            else: self.numerator = parameters['numerator']
+            if self.numerator is None:
+                self.numerator = __numerator(self)
 
-            if parameters['denominator'] is None:
-                self.denominator = __denominator()
-            else: self.denominator = parameters['denominator']
+            if self.denominator is None:
+                self.denominator = __denominator(self)
 
-            if self.censor is not None:
-                if self.parameters['censor_numerator'] is None:
-                    self.censor_numerator = __censor_numerator()
-                else: self.censor_numerator = self.parameters['censor_numerator']
+            if self.cense is not None:
+                if self.cense_numerator is None:
+                    self.cense_numerator = __cense_numerator()
 
-                if parameters['censor_denominator'] is None:
-                    self.cenor_denominator = __censor_denominator()
-                else: self.censor_denominator = parameters['censor_denominator']
+                if self.cense_denominator is None:
+                    self.cense_denominator = __cense_denominator()
 
     def expand(self):
         self.DT = __binder(__mapper(self.data), self.data, __colString([
-            self.covariates, self.numerator, self.denominator, self.censor_numerator, self.censor_denominator
-            ]), self.eligible_col, self.excused_col0, self.excused_col1,
+            self.covariates, self.numerator, self.denominator, self.cense_numerator, self.cense_denominator
+            ]), self.eligible_col, self.excused_colnames,
             self.baseline_indicator, self.squared_indicator)
         
         if self.method != "ITT":
             self.DT = __dynamic(self.DT)
-        if self.random_selection:
+        if self.selection_random:
             self.DT = __randomSelection(self.DT)
 
     def weight(self):
