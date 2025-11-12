@@ -4,13 +4,14 @@ from dataclasses import asdict
 from collections import Counter
 import polars as pl
 import numpy as np
+from scipy.stats import sem, t
 
 from .SEQopts import SEQopts
 from .helpers import _colString, bootstrap_loop
 from .initialization import _outcome, _numerator, _denominator, _cense_numerator, _cense_denominator
 from .expansion import _mapper, _binder, _dynamic, _randomSelection
 from .weighting import _weight_prepare_data, _weight_model, _weight_predict, _weight_bind, _weight_cumprod
-from .analysis import _outcome_fit, _survival_prepare_data, _survival_predict
+from .analysis import _outcome_fit, _prepare_stats, _prepare_surv_data
 from .plot import _survival_plot
 
 
@@ -99,7 +100,15 @@ class SEQuential:
         # anti-prediction - where there is no adherence, 1- prediction
         # next
         
-    def bootstrap(self):
+    def bootstrap(self, **kwargs):
+        allowed = {"bootstrap_nboot", "bootstrap_sample", 
+                   "bootstrap_CI", "bootstrap_method"}
+        for key, value in kwargs.items():
+            if key in allowed:
+                setattr(self, key, value)
+            else:
+                raise ValueError(f"Unknown argument: {key}")
+        
         rng = np.random.RandomState(self.seed) if self.seed is not None else np.random
         UIDs = self.DT.select(pl.col(self.id_col)).unique().to_series().to_list()
         NIDs = len(UIDs)
@@ -115,14 +124,12 @@ class SEQuential:
     def fit(self):
         if self.weighted and "weight" not in self.DT:
             print("It seems like you have not weighted your data yet, consider running the weight() method first.")
-        _outcome_fit(self.DT, 
-                     self.outcome_col,
-                     self.covariates,
-                     self.weighted,
-                     "weight")
-
-    def survival():
-        pass
-
+        return _outcome_fit(self.DT,
+                            self.outcome_col,
+                            self.covariates,
+                            self.weighted,
+                            "weight")
+    def survival(self):    
+        
     def plot():
         pass
