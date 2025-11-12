@@ -12,4 +12,5 @@ s.expand()
 dt = s.DT
 print(dt)
 s.fit()
-print(s.outcome_model.summary())
+print(s.outcome_model[0].summary())
+print(s.survival()[0])

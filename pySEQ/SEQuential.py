@@ -11,7 +11,7 @@ from .helpers import _colString, bootstrap_loop
 from .initialization import _outcome, _numerator, _denominator, _cense_numerator, _cense_denominator
 from .expansion import _mapper, _binder, _dynamic, _randomSelection
 from .weighting import _weight_prepare_data, _weight_model, _weight_predict, _weight_bind, _weight_cumprod
-from .analysis import _outcome_fit, _prepare_stats, _prepare_surv_data
+from .analysis import _outcome_fit, _get_predictions, _calculate_risk, _calculate_survival
 from .plot import _survival_plot
 
 
@@ -129,7 +129,15 @@ class SEQuential:
                             self.covariates,
                             self.weighted,
                             "weight")
-    def survival(self):    
+    def survival(self):
+         # some checking if km_curves were setup in settings here:
+        risk_data = _calculate_risk(self)
+        survival_data = _calculate_survival(risk_data)
         
-    def plot():
+        return risk_data, survival_data
+  
+    def hazard(self):
+        pass
+        
+    def plot(self):
         pass
