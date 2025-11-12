@@ -1,6 +1,6 @@
 import polars as pl
 
-def _binder(DT, data, id_col, time_col, eligible_col, kept_cols, 
+def _binder(DT, data, id_col, time_col, eligible_col, outcome_col, kept_cols, 
             baseline_indicator, squared_indicator):
     """
     Internal function to bind data to the map created by __mapper
@@ -13,10 +13,11 @@ def _binder(DT, data, id_col, time_col, eligible_col, kept_cols,
                 "trial",
                 f"trial{squared_indicator}"}
     
-    cols = kept_cols.union({eligible_col})
+    cols = kept_cols.union({eligible_col, outcome_col})
     cols = {col for col in cols if col is not None}
 
     regular = {col for col in cols if not (baseline_indicator in col or squared_indicator in col) and col not in excluded}
+    
     baseline = {col for col in cols if baseline_indicator in col and col not in excluded}
     bas_kept = {col.replace(baseline_indicator, "") for col in baseline}
     
@@ -32,6 +33,10 @@ def _binder(DT, data, id_col, time_col, eligible_col, kept_cols,
         how='left'
     )
     DT.sort([id_col, "trial", "followup"])
+    
+    for i in ["trial", "followup"]:
+        colname = f"{i}{squared_indicator}"
+        DT = DT.with_columns((pl.col(i) ** 2).alias(colname))
     
     if squared:
         for sq in squared:

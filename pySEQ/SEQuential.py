@@ -77,7 +77,7 @@ class SEQuential:
         )
         
         self.DT = _binder(_mapper(self.data, self.id_col, self.time_col), self.data,
-                          self.id_col, self.time_col, self.eligible_col,
+                          self.id_col, self.time_col, self.eligible_col, self.outcome_col,
                           _colString([self.covariates, 
                                       self.numerator, self.denominator, 
                                       self.cense_numerator, self.cense_denominator]).union(kept), 
@@ -112,14 +112,14 @@ class SEQuential:
         return self
     
     @bootstrap_loop      
-    def outcome(self):
+    def fit(self):
         if self.weighted and "weight" not in self.DT:
             print("It seems like you have not weighted your data yet, consider running the weight() method first.")
-        self.outcome_model = _outcome_fit(self.DT, 
-                                           self.outcome_col, 
-                                           self.covariates, 
-                                           self.weighted, 
-                                           "weight")
+        _outcome_fit(self.DT, 
+                     self.outcome_col,
+                     self.covariates,
+                     self.weighted,
+                     "weight")
 
     def survival():
         pass

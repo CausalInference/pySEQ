@@ -13,5 +13,6 @@ dependencies = [
     "polars",
     "tqdm",
     "statsmodels",
-    "matplotlib"
+    "matplotlib",
+    "pyarrow"
 ]

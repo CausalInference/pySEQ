@@ -11,4 +11,5 @@ s.expand()
 
 dt = s.DT
 print(dt)
-dt.write_csv("test.csv")
+s.fit()
+print(s.outcome_model.summary())
