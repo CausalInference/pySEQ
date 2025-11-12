@@ -131,10 +131,9 @@ class SEQuential:
                             "weight")
     def survival(self):
          # some checking if km_curves were setup in settings here:
-        risk_data = _calculate_risk(self)
-        survival_data = _calculate_survival(risk_data)
+        risk = _calculate_risk(self)
         
-        return risk_data, survival_data
+        return risk
   
     def hazard(self):
         pass

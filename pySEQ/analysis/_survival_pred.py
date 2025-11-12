@@ -43,10 +43,10 @@ def _calculate_risk(self):
         .with_columns([
             (pl.col("followup") + 1).alias("followup"),
             (pl.col("followup") ** 2).alias(f"followup{self.indicator_squared}")
-        ]).sort("followup")
-    )
+        ])
+    ).sort([self.id_col, "trial", "followup"])
     
-    survs = []
+    risks = []
     for i in self.treatment_level:
         TxDT = SDT.with_columns([
             pl.lit(i).alias(f"{self.treatment_col}{self.indicator_baseline}")
@@ -65,16 +65,19 @@ def _calculate_risk(self):
                 full.append(pl.Series(f"pred_risk_{idx}", pred))
         
         names = [col.name for col in full]
-        TxDT = TxDT.with_columns(full).group_by("followup").agg([
+        
+        TxDT = TxDT.with_columns(full).with_columns([
+            (1 - pl.col(col)).cum_prod().over("TID").alias(col) for col in names
+        ]).group_by("followup").agg([
             pl.col(col).mean() for col in names
-        ]).with_columns([
-            (1 - pl.col(col)).cum_prod().alias(col) for col in names
+        ]).sort("followup").with_columns([
+            (1 - pl.col(col)).alias(col) for col in names
         ])
         
         boots = [col for col in names if col != "pred_risk"]
         
         if len(boots) > 0:
-            surv = TxDT.select(["followup"] + boots).unpivot(
+            risk = TxDT.select(["followup"] + boots).unpivot(
                 index="followup",
                 on=boots,
                 variable_name="bootID",
@@ -84,6 +87,7 @@ def _calculate_risk(self):
                 pl.col("risk").quantile(lci).alias("LCI"),
                 pl.col("risk").quantile(uci).alias("UCI")
             ])
+            risk = risk.join(TxDT.select(["followup", "pred_risk"]), on="followup")
                         
             if self.bootstrap_CI_method == "se":
                 from scipy.stats import norm
@@ -92,18 +96,35 @@ def _calculate_risk(self):
                     (pl.col("pred_risk") - z * pl.col("SE")).alias("LCI"),
                     (pl.col("pred_risk") + z * pl.col("SE")).alias("UCI")
                 ])
+            fup0 = pl.DataFrame({
+                "followup": [0],
+                "pred_risk": [0.0],
+                "SE": [0.0],
+                "LCI": [0.0],
+                "UCI": [0.0],
+                self.treatment_col: [i]
+                }).with_columns([
+                    pl.col("followup").cast(pl.Int64),
+                    pl.col(self.treatment_col).cast(pl.Int32)
+                    ])
         else:
-            surv = TxDT.select(["followup", "pred_risk"])
+            fup0 = pl.DataFrame({
+                "followup": [0],
+                "pred_risk": [0.0],
+                self.treatment_col: [i]
+                }).with_columns([
+                    pl.col("followup").cast(pl.Int64),
+                    pl.col(self.treatment_col).cast(pl.Int32)
+                    ])
+            risk = TxDT.select(["followup", "pred_risk"]).sort("followup")
         
-        surv = surv.with_columns([
-            pl.lit(i).alias(self.treatment_col)
-        ])
-        
-        surv.append(risk)
+        risk = risk.with_columns(pl.lit(i).alias(self.treatment_col))
+        risk = pl.concat([fup0, risk])
+        risks.append(risk)
     
-    all_risks = pl.concat(survs)
-    return all_risks
+    out = pl.concat(risks, how='vertical')
+    return out
         
 
-def _calculate_risks(surv):
+def _calculate_survival(risk_list):
     pass
