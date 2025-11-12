@@ -1,13 +1,13 @@
 from typing import Optional, List
 import sys
+import time
 from dataclasses import asdict
 from collections import Counter
 import polars as pl
 import numpy as np
-from scipy.stats import sem, t
 
 from .SEQopts import SEQopts
-from .helpers import _colString, bootstrap_loop
+from .helpers import _colString, bootstrap_loop, _format_time
 from .initialization import _outcome, _numerator, _denominator, _cense_numerator, _cense_denominator
 from .expansion import _mapper, _binder, _dynamic, _randomSelection
 from .weighting import _weight_prepare_data, _weight_model, _weight_predict, _weight_bind, _weight_cumprod
@@ -65,6 +65,7 @@ class SEQuential:
                     self.cense_denominator = _cense_denominator()
 
     def expand(self):
+        start = time.perf_counter()
         kept = [self.cense_colname, self.cense_eligible_colname,
                 self.compevent_colname, 
                 self.subgroup_colname,
@@ -88,8 +89,11 @@ class SEQuential:
             self.DT = _dynamic(self.DT)
         if self.selection_random:
             self.DT = _randomSelection(self.DT)
+        end = time.perf_counter()
+        self.expansion_time = _format_time(start, end)
 
     def weight(self):
+        start = time.perf_counter()
         if not self.weighted: 
             sys.exit("""No planned weighting initialized, 
                      consider adding weighted=True in your parameter dictionary""")
@@ -99,6 +103,8 @@ class SEQuential:
         # predition - predict on the data the odds for adherence 
         # anti-prediction - where there is no adherence, 1- prediction
         # next
+        end = time.perf_counter()
+        self.weighting_time = _format_time(start, end)
         
     def bootstrap(self, **kwargs):
         allowed = {"bootstrap_nboot", "bootstrap_sample", 
@@ -130,10 +136,14 @@ class SEQuential:
                             self.weighted,
                             "weight")
     def survival(self):
-         # some checking if km_curves were setup in settings here:
-        risk = _calculate_risk(self)
+        start = time.perf_counter()
         
-        return risk
+        risk_data = _calculate_risk(self)
+        surv_data = _calculate_survival(self, risk_data)
+        self.km_data = pl.concat([risk_data, surv_data])
+        
+        end = time.perf_counter()
+        self.survival_time = _format_time(start, end)
   
     def hazard(self):
         pass

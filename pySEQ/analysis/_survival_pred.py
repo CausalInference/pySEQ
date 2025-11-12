@@ -122,9 +122,21 @@ def _calculate_risk(self):
         risk = pl.concat([fup0, risk])
         risks.append(risk)
     
-    out = pl.concat(risks, how='vertical')
+    out = pl.concat(risks, how='vertical') \
+        .with_columns(pl.lit("risk").alias("estimate")) \
+            .rename({"pred_risk": "pred"})
     return out
         
 
-def _calculate_survival(risk_list):
-    pass
+def _calculate_survival(self, risk_data):
+    if self.bootstrap_nboot > 0:
+        surv = risk_data.with_columns([
+            (1 - pl.col(col)).alias(col) for col in ["pred", "LCI", "UCI"]
+        ]).with_columns(pl.lit("survival").alias("estimate"))
+    else: 
+        surv = risk_data.with_columns([
+            (1 - pl.col("pred")).alias("pred"),
+            pl.lit("survival").alias("estimate")
+            ])
+    return surv
+    
