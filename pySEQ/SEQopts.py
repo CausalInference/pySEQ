@@ -41,7 +41,7 @@ class SEQopts:
     selection_first_trial: bool = False
     selection_probability: float = 0.8
     selection_random: bool = False
-    subgroup: str = None
+    subgroup_colname: str = None
     survival_max: int = None
     survival_min: int = 0
     treatment_level: List[int] = field(default_factory=lambda: [0, 1])

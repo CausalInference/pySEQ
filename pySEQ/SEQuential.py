@@ -64,10 +64,24 @@ class SEQuential:
                     self.cense_denominator = _cense_denominator()
 
     def expand(self):
-        self.DT = _binder(_mapper(self.data, self.id_col, self.time_col), self.data, _colString([
-            self.covariates, self.numerator, self.denominator, self.cense_numerator, self.cense_denominator
-            ]), self.eligible_col, self.excused_colnames,
-            self.indicator_baseline, self.indicator_squared)
+        kept = [self.cense_colname, self.cense_eligible_colname,
+                self.compevent_colname, 
+                self.subgroup_colname,
+                self.weight_eligible_colnames]
+        
+        self.data = self.data.with_columns(
+            pl.when(pl.col(self.treatment_col).is_in(self.treatment_level))
+            .then(self.eligible_col)
+            .otherwise(0)
+            .alias(self.eligible_col)
+        )
+        
+        self.DT = _binder(_mapper(self.data, self.id_col, self.time_col), self.data,
+                          self.id_col, self.time_col, self.eligible_col,
+                          _colString([self.covariates, 
+                                      self.numerator, self.denominator, 
+                                      self.cense_numerator, self.cense_denominator]).union(kept), 
+                          self.indicator_baseline, self.indicator_squared)
         
         if self.method != "ITT":
             self.DT = _dynamic(self.DT)

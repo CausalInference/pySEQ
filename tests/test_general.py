@@ -6,8 +6,9 @@ csv_path = os.path.expanduser("/Users/ryanodea/Documents/GitHub/pySEQ/tests/SEQd
 data = pl.read_csv(csv_path)
 
 s = SEQuential(data, "ID", "time", "eligible", "tx_init", "outcome", 
-               ["N", "L", "P"], "sex", "ITT")
+               ["N", "L", "P"], ["sex"], "ITT")
 s.expand()
 
 dt = s.DT
 print(dt)
+dt.write_csv("test.csv")
