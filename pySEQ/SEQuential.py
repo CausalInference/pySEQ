@@ -149,4 +149,5 @@ class SEQuential:
         pass
         
     def plot(self):
-        pass
+        self.km_graph = _survival_plot(self)
+        print(self.km_graph)

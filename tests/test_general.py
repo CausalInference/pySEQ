@@ -13,5 +13,6 @@ dt = s.DT
 print(dt)
 s.fit()
 print(s.outcome_model[0].summary())
-output = s.survival()
-print(output)
+s.survival()
+s.plot()
+
