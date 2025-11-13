@@ -2,9 +2,9 @@ import concurrent.futures
 import polars as pl
 import numpy as np
 from ._outcome_fit import _outcome_fit
+from ..helpers import _predict_model
 
-
-def _get_predictions(self, newdata):
+def _get_outcome_predictions(self, newdata):
     if self.compevent_colname is not None:
         pass
     
@@ -15,10 +15,6 @@ def _get_predictions(self, newdata):
         preds = [_predict_model(model, newdata) for model in self.outcome_model]
     
     return preds
-
-def _predict_model(model, newdata):
-    return np.array(model.predict(newdata)).flatten()
-
 
 def _calculate_risk(self):
     a = 1 - self.bootstrap_CI
@@ -57,7 +53,7 @@ def _calculate_risk(self):
         if self.compevent_colname is not None:
             pass
         
-        preds = _get_predictions(self, TxDT)
+        preds = _get_outcome_predictions(self, TxDT)
         full = [pl.Series("pred_risk", preds[0])]
         
         if self.bootstrap_nboot > 0:

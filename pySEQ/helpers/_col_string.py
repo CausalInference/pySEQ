@@ -1,4 +1,4 @@
-def _colString(expressions):
+def _col_string(expressions):
     cols = set()
     for expression in expressions:
         if expression is not None:

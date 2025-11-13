@@ -7,11 +7,11 @@ import polars as pl
 import numpy as np
 
 from .SEQopts import SEQopts
-from .helpers import _colString, bootstrap_loop, _format_time
+from .helpers import _col_string, bootstrap_loop, _format_time
 from .initialization import _outcome, _numerator, _denominator, _cense_numerator, _cense_denominator
 from .expansion import _mapper, _binder, _dynamic, _randomSelection
-from .weighting import _weight_prepare_data, _weight_model, _weight_predict, _weight_bind, _weight_cumprod
-from .analysis import _outcome_fit, _get_predictions, _calculate_risk, _calculate_survival
+from .weighting import _weight_setup, _fit_LTFU, _fit_numerator, _fit_denominator, _weight_bind
+from .analysis import _outcome_fit, _calculate_risk, _calculate_survival
 from .plot import _survival_plot
 
 
@@ -42,11 +42,9 @@ class SEQuential:
         if parameters is None:
             parameters = SEQopts()
             
-        # Absorb parameters from SEQopts dataclass
         for name, value in asdict(parameters).items():
             setattr(self, name, value)
         
-        # Create default covariates
         if self.covariates is None:
             self.covariates = _outcome(self)
 
@@ -80,7 +78,7 @@ class SEQuential:
         
         self.DT = _binder(_mapper(self.data, self.id_col, self.time_col), self.data,
                           self.id_col, self.time_col, self.eligible_col, self.outcome_col,
-                          _colString([self.covariates, 
+                          _col_string([self.covariates, 
                                       self.numerator, self.denominator, 
                                       self.cense_numerator, self.cense_denominator]).union(kept), 
                           self.indicator_baseline, self.indicator_squared)
@@ -94,15 +92,13 @@ class SEQuential:
 
     def weight(self):
         start = time.perf_counter()
-        if not self.weighted: 
-            sys.exit("""No planned weighting initialized, 
-                     consider adding weighted=True in your parameter dictionary""")
-        # for level in treatment level do
-        # data creation - subset data to where the baseline is level
-        # modeling - model from the data and covariates
-        # predition - predict on the data the odds for adherence 
-        # anti-prediction - where there is no adherence, 1- prediction
-        # next
+        
+        WDT = _weight_setup(self)
+        _fit_LTFU(self, WDT)
+        _fit_numerator(self, WDT)
+        _fit_denominator(self, WDT)
+        WDT = _weight_bind(self, WDT)
+        
         end = time.perf_counter()
         self.weighting_time = _format_time(start, end)
         

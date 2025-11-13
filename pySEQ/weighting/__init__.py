@@ -1,5 +1,4 @@
-from ._weightModel import _weight_model
-from ._weightPredict import _weight_predict
-from ._weightBinder import _weight_bind
-from ._weightCumprod import _weight_cumprod
-from ._weightData import _weight_prepare_data
+from ._weight_fit import _fit_LTFU, _fit_numerator, _fit_denominator
+from ._weight_pred import _weight_predict
+from ._weight_bind import _weight_bind
+from ._weight_data import _weight_setup
