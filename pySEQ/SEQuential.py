@@ -115,6 +115,11 @@ class SEQuential:
         start = time.perf_counter()
         if self.weighted:
             WDT = _weight_setup(self)
+            if not self.weight_preexpansion and not self.excused:
+                WDT = WDT.filter(pl.col("followup") > 0)
+            
+            WDT = WDT.to_pandas()
+            
             _fit_LTFU(self, WDT)
             _fit_numerator(self, WDT)
             _fit_denominator(self, WDT)
