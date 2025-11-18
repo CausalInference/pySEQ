@@ -139,7 +139,7 @@ class SEQuential:
             _fit_denominator(self, WDT)
             
             WDT = pl.from_pandas(WDT)
-            _weight_predict(self, WDT)
+            WDT = _weight_predict(self, WDT)
             _weight_bind(self, WDT)
         
         end = time.perf_counter()

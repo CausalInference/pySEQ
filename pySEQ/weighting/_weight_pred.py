@@ -59,4 +59,6 @@ def _weight_predict(self, WDT):
                 pl.lit(1.).alias("cense")
             )
     kept = ["numerator", "denominator", "cense", self.id_col, "trial", time]
-    return WDT
+    exists =[col for col in kept if col in WDT.columns]
+    
+    return WDT.select(exists)
