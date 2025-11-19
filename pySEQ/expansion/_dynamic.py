@@ -11,7 +11,7 @@ def _dynamic(self):
             .alias("dose")
         ).with_columns([
             (pl.col("dose") ** 2)
-            .alias(f"dose{self.squared_indicator}")
+            .alias(f"dose{self.indicator_squared}")
         ])
         self.DT = DT
         
