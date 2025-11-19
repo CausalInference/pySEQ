@@ -10,7 +10,7 @@ from .SEQopts import SEQopts
 from .helpers import _col_string, bootstrap_loop, _format_time
 from .initialization import _outcome, _numerator, _denominator, _cense_numerator, _cense_denominator
 from .expansion import _mapper, _binder, _dynamic, _randomSelection
-from .weighting import _weight_setup, _fit_LTFU, _fit_numerator, _fit_denominator, _weight_bind, _weight_predict
+from .weighting import _weight_setup, _fit_LTFU, _fit_numerator, _fit_denominator, _weight_bind, _weight_predict, _weight_stats
 from .analysis import _outcome_fit, _calculate_risk, _calculate_survival
 from .plot import _survival_plot
 
@@ -141,6 +141,8 @@ class SEQuential:
             WDT = pl.from_pandas(WDT)
             WDT = _weight_predict(self, WDT)
             _weight_bind(self, WDT)
+            
+            self.weight_stats = _weight_stats(self)
         
         end = time.perf_counter()
         self.model_time = _format_time(start, end)
