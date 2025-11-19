@@ -7,10 +7,10 @@ import polars as pl
 import numpy as np
 
 from .SEQopts import SEQopts
-from .helpers import _col_string, bootstrap_loop, _format_time
+from .helpers import _col_string, bootstrap_loop, _format_time, _prepare_data
 from .initialization import _outcome, _numerator, _denominator, _cense_numerator, _cense_denominator
 from .expansion import _mapper, _binder, _dynamic, _randomSelection
-from .weighting import _weight_setup, _fit_LTFU, _fit_numerator, _fit_denominator, _weight_bind
+from .weighting import _weight_setup, _fit_LTFU, _fit_numerator, _fit_denominator, _weight_bind, _weight_predict, _weight_stats
 from .analysis import _outcome_fit, _calculate_risk, _calculate_survival
 from .plot import _survival_plot
 
@@ -55,7 +55,7 @@ class SEQuential:
             if self.denominator is None:
                 self.denominator = _denominator(self)
 
-            if self.cense is not None:
+            if self.cense_colname is not None:
                 if self.cense_numerator is None:
                     self.cense_numerator = _cense_numerator()
 
@@ -69,27 +69,45 @@ class SEQuential:
                 self.subgroup_colname,
                 self.weight_eligible_colnames]
         
-        self.data = self.data.with_columns(
+        self.data = self.data.with_columns([
             pl.when(pl.col(self.treatment_col).is_in(self.treatment_level))
             .then(self.eligible_col)
             .otherwise(0)
-            .alias(self.eligible_col)
-        )
+            .alias(self.eligible_col),
+            pl.col(self.treatment_col)
+            .shift(1)
+            .over([self.id_col])
+            .alias("tx_lag"),
+            pl.lit(False).alias("switch")
+        ]).with_columns([
+            pl.when(pl.col(self.time_col) == 0)
+            .then(pl.lit(False))
+            .otherwise(
+                (pl.col("tx_lag").is_not_null()) &
+                (pl.col("tx_lag") != pl.col(self.treatment_col))
+            ).cast(pl.Int8)
+            .alias("switch")
+        ])
         
         self.DT = _binder(_mapper(self.data, self.id_col, self.time_col), self.data,
                           self.id_col, self.time_col, self.eligible_col, self.outcome_col,
                           _col_string([self.covariates, 
                                       self.numerator, self.denominator, 
                                       self.cense_numerator, self.cense_denominator]).union(kept), 
-                          self.indicator_baseline, self.indicator_squared)
+                          self.indicator_baseline, self.indicator_squared) \
+                              .with_columns(pl.col(self.id_col).cast(pl.Utf8).alias(self.id_col))
+        self.data = self.data.with_columns(pl.col(self.id_col).cast(pl.Utf8).alias(self.id_col))
+        
+        #self.data = _prepare_data(self, self.data)
+        #self.DT = _prepare_data(self, self.DT)
         
         if self.method != "ITT":
-            self.DT = _dynamic(self.DT)
+            _dynamic(self)
         if self.selection_random:
-            self.DT = _randomSelection(self.DT)
+            _randomSelection(self.DT)
         end = time.perf_counter()
         self.expansion_time = _format_time(start, end)
-        
+                    
     def bootstrap(self, **kwargs):
         allowed = {"bootstrap_nboot", "bootstrap_sample", 
                    "bootstrap_CI", "bootstrap_method"}
@@ -117,17 +135,26 @@ class SEQuential:
             WDT = _weight_setup(self)
             if not self.weight_preexpansion and not self.excused:
                 WDT = WDT.filter(pl.col("followup") > 0)
-            
+                
             WDT = WDT.to_pandas()
+            for col in self.fixed_cols:
+                if col in WDT.columns:
+                    WDT[col] = WDT[col].astype("category")
             
             _fit_LTFU(self, WDT)
             _fit_numerator(self, WDT)
             _fit_denominator(self, WDT)
-            self.DT = _weight_bind(self, WDT)
+            
+            WDT = pl.from_pandas(WDT)
+            WDT = _weight_predict(self, WDT)
+            _weight_bind(self, WDT)
+            
+            self.weight_stats = _weight_stats(self)
         
         end = time.perf_counter()
         self.model_time = _format_time(start, end)
-        return _outcome_fit(self.DT,
+        return _outcome_fit(self,
+                            self.DT,
                             self.outcome_col,
                             self.covariates,
                             self.weighted,
