@@ -152,7 +152,6 @@ class SEQuential:
             WDT = pl.from_pandas(WDT)
             WDT = _weight_predict(self, WDT)
             _weight_bind(self, WDT)
-            
             self.weight_stats = _weight_stats(self)
         
         end = time.perf_counter()

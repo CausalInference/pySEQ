@@ -1,8 +1,7 @@
-import polars as pl
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
 
-def _fit_LTFU(self, WDT: pl.DataFrame):
+def _fit_LTFU(self, WDT):
     if self.cense_colname is None:
         return
     else:
@@ -20,7 +19,7 @@ def _fit_LTFU(self, WDT: pl.DataFrame):
         self.cense_numerator = fits[0]
         self.cense_denominator = fits[1]
 
-def _fit_numerator(self, WDT: pl.DataFrame):
+def _fit_numerator(self, WDT):
     if self.weight_preexpansion and self.excused:
         return
     if self.method == "ITT":
@@ -38,7 +37,7 @@ def _fit_numerator(self, WDT: pl.DataFrame):
         model_fit = model.fit(disp=0)
         fits.append(model_fit)
         
-    self.numerator_model = model_fit
+    self.numerator_model = fits
         
 def _fit_denominator(self, WDT):
     if self.method == "ITT":
@@ -56,4 +55,5 @@ def _fit_denominator(self, WDT):
         model_fit = model.fit(disp=0)
         fits.append(model_fit)
         
-    self.denominator_model = model_fit
+    self.denominator_model = fits
+    

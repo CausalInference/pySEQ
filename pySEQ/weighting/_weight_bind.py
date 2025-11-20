@@ -17,7 +17,7 @@ def _weight_bind(self, WDT):
         trial = (pl.col("trial") == 0) & (pl.col("period") == 0)
         excused = pl.col("isExcused").fill_null(False).cum_sum().over([self.id_col, "trial"]) > 0
     else:
-        trial = (pl.col("trial") == pl.col("trial").min().over(self.id_col))
+        trial = (pl.col("trial") == pl.col("trial").min().over(self.id_col)) & (pl.col("followup") == 0)
         excused = pl.lit(False)
 
     override = (
