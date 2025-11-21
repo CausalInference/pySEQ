@@ -1,4 +1,5 @@
 import polars as pl
+
 def _dynamic(self):
     """
     Handles special cases for the data from the __mapper -> __binder pipeline
@@ -17,7 +18,10 @@ def _dynamic(self):
         
     elif self.method == "censoring":
         DT = self.DT.sort([self.id_col, "trial", "followup"]).with_columns(
-            pl.col(self.treatment_col).shift(1).over([self.id_col, "trial"]).alias("tx_lag")
+            pl.col(self.treatment_col)
+            .shift(1)
+            .over([self.id_col, "trial"])
+            .alias("tx_lag")
         )
         
         switch = (
@@ -28,7 +32,7 @@ def _dynamic(self):
                 (pl.col("tx_lag") != pl.col(self.treatment_col))
             )
         )
-        
+        is_excused = pl.lit(False)
         if self.excused:
             conditions = []
             for i in range(len(self.treatment_level)):
@@ -41,21 +45,29 @@ def _dynamic(self):
             
             if conditions:
                 excused = pl.any_horizontal(conditions)
+                is_excused = switch & excused
                 switch = (
-                    pl.when(pl.any_horizontal(conditions))
+                    pl.when(excused)
                     .then(pl.lit(False))
                     .otherwise(switch) 
                 )
-
+        
         DT = DT.with_columns([
             switch.alias("switch"),
-            excused.alias("isExcused") if self.excused else pl.lit(False).alias("isExcused")
-        ]).filter(
-            pl.col("switch").cum_max().over([self.id_col, "trial"])
-            .shift(1, fill_value=False) 
-            == 0
+            is_excused.alias("isExcused")
+        ]).sort([self.id_col, "trial", "followup"]) \
+            .filter(
+                (
+                    pl.col("switch")
+                    .cum_max()
+                    .shift(1, fill_value=False)
+                )
+                .over([self.id_col, "trial"])
+                == 0
         ).with_columns(
-            pl.col("switch").cast(pl.Int8).alias("switch")
+            pl.col("switch")
+            .cast(pl.Int8)
+            .alias("switch")
         )
         
         self.DT = DT.drop(["tx_lag"])

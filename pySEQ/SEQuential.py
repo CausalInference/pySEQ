@@ -68,9 +68,9 @@ class SEQuential:
     def expand(self):
         start = time.perf_counter()
         kept = [self.cense_colname, self.cense_eligible_colname,
-                self.compevent_colname, 
-                self.subgroup_colname,
-                self.weight_eligible_colnames]
+                self.compevent_colname,
+                *self.weight_eligible_colnames,
+                *self.excused_colnames]
         
         self.data = self.data.with_columns([
             pl.when(pl.col(self.treatment_col).is_in(self.treatment_level))
@@ -153,7 +153,6 @@ class SEQuential:
             WDT = _weight_predict(self, WDT)
             _weight_bind(self, WDT)
             self.weight_stats = _weight_stats(self)
-            self.DT.write_csv("test.csv")
         
         end = time.perf_counter()
         self.model_time = _format_time(start, end)

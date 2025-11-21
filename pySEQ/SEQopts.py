@@ -17,7 +17,7 @@ class SEQopts:
     data_return: bool = False
     denominator: Optional[List[str]] = None
     excused: bool = False
-    excused_colnames: Optional[List[str]] = None
+    excused_colnames: List[str] = field(default_factory=lambda: [])
     followup_class: bool = False
     followup_include: bool = True
     followup_max: int = None
@@ -32,7 +32,7 @@ class SEQopts:
     numerator: Optional[List[str]] = None
     parallel: bool = False
     plot_colors: List[str] = field(default_factory=lambda: ["#F8766D", "#00BFC4", "#555555"])
-    plot_labels: Optional[List[str]] = None
+    plot_labels: List[str] = field(default_factory=lambda: [])
     plot_subtitle: str = None
     plot_title: str = None
     plot_type: Literal["risk", "survival", "inc"] = "risk"
@@ -45,7 +45,7 @@ class SEQopts:
     survival_min: int = 0
     treatment_level: List[int] = field(default_factory=lambda: [0, 1])
     trial_include: bool = True
-    weight_eligible_colnames: Optional[List[str]] = None
+    weight_eligible_colnames: List[str] = field(default_factory=lambda: [])
     weight_min: float = 0.0
     weight_max: float = None
     weight_lag_condition: bool = False

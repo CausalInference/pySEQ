@@ -5,4 +5,4 @@ def _predict_model(self, model, newdata):
     for col in self.fixed_cols:
         if col in newdata.columns:
             newdata[col] = newdata[col].astype("category")            
-    return np.array(model.predict(newdata)).flatten()
+    return np.array(model.predict(newdata))
