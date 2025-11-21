@@ -105,7 +105,8 @@ class SEQuential:
         if self.method != "ITT":
             _dynamic(self)
         if self.selection_random:
-            _randomSelection(self.DT)
+            _randomSelection(self)
+            
         end = time.perf_counter()
         self.expansion_time = _format_time(start, end)
                     
@@ -118,13 +119,13 @@ class SEQuential:
             else:
                 raise ValueError(f"Unknown argument: {key}")
         
-        rng = np.random.RandomState(self.seed) if self.seed is not None else np.random
+        self._rng = np.random.RandomState(self.seed) if self.seed is not None else np.random
         UIDs = self.DT.select(pl.col(self.id_col)).unique().to_series().to_list()
         NIDs = len(UIDs)
         
         self._boot_samples = []
         for _ in range(self.bootstrap_nboot):
-            sampled_IDs = rng.choice(UIDs, size=int(self.bootstrap_sample * NIDs), replace=True)
+            sampled_IDs = self._rng.choice(UIDs, size=int(self.bootstrap_sample * NIDs), replace=True)
             id_counts = Counter(sampled_IDs)
             self._boot_samples.append(id_counts)
         return self
