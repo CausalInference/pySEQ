@@ -23,8 +23,6 @@ def test_ITT_coefs():
                       0.03371515698762837, -0.00014691202235021713, 0.044566165558946304, 
                       0.000578777043905276, 0.0032906669395291782, -0.013392420492057825, 
                       0.20072409918428197]
-    return
-
 
 def test_PreE_dose_response_coefs():
     data = load_data("SEQdata")
@@ -69,12 +67,10 @@ def test_PostE_dose_response_coefs():
     s.expand()
     s.fit()
     matrix = s.outcome_model[0].summary2().tables[1]['Coef.'].to_list()
-    assert matrix == [-6.378405714539014, 0.1783781183733739, 0.04468084245850419, 
-                      -0.00028721095405992604, -0.0001680250387661585, -1.6465184245665544e-05, 
-                      0.03796880915870554, 0.0006587394643895277, 0.002530895897349293, 
-                      -0.039757502333589184, 0.1638394382909944]
-    
-    return print(matrix)
+    assert matrix == [-6.378405714539087, 0.17837811837341735, 0.04468084245849907, 
+                      -0.0002872109540598882, -0.00016802503876320882, -1.646518424567451e-05, 
+                      0.037968809158708365, 0.0006587394643894709, 0.002530895897349477, 
+                      -0.039757502333589004, 0.16383943829099348]
 
 def test_PreE_censoring_coefs():
     data = load_data("SEQdata")
@@ -98,7 +94,6 @@ def test_PreE_censoring_coefs():
     assert matrix == [-4.661102616366661, 0.06322831388844205, 0.5000738277717721, 
                       0.007974580521778882, 0.0005337038990034418, -0.011577561000157839, 
                       0.0010459271332870575]
-    return
 
 def test_PostE_censoring_coefs():
     data = load_data("SEQdata")
@@ -118,12 +113,13 @@ def test_PostE_censoring_coefs():
     s.expand()
     s.fit()
     matrix = s.outcome_model[0].summary2().tables[1]["Coef."].to_list()
-    assert matrix == [-7.552997975919737, 0.09676401101585111, 0.4731499690921231, 
-                      0.009424470533477319, 0.0005314170238427062, 0.04111388864102163, 
-                      0.0007102010905924766, 0.003667143725614561, 0.007220844654484709, 
-                      0.30098248859104154]
-'''
-def test_PreE_censoring_excused_covariates():
+    assert matrix == [-7.5529979759196735, 0.09676401101585402, 
+                      0.47314996909212975, 0.009424470533477088, 
+                      0.0005314170238427201, 0.041113888641022785, 
+                      0.0007102010905924148, 0.003667143725614389, 
+                      0.007220844654484469, 0.3009824885910414]
+
+def test_PreE_censoring_excused_coefs():
     data = load_data("SEQdata")
     
     s = SEQuential(
@@ -139,14 +135,15 @@ def test_PreE_censoring_excused_covariates():
         parameters=SEQopts(weighted=True,
                            weight_preexpansion=True,
                            excused=True,
-                           excused_colnames=["ExcusedZero", "ExcusedOne"])
+                           excused_colnames=["excusedZero", "excusedOne"])
     )
-    assert s.covariates == "tx_init_bas+followup+followup_sq+trial+trial_sq+tx_init_bas*followup"
-    assert s.numerator is None
-    assert s.denominator == "sex+N+L+P+time+time_sq"
-    return
+    s.expand()
+    s.fit()
+    matrix = s.outcome_model[0].summary2().tables[1]['Coef.'].to_list()
+    assert matrix == [-4.785472683278245, 0.36610312911034926, 0.029561364724039044, 
+                      -0.00020039125274747224, 0.021971717586055102, 0.0004172559228901589]
 
-def test_PostE_censoring_excused_covariates():
+def test_PostE_censoring_excused_coefs():
     data = load_data("SEQdata")
     
     s = SEQuential(
@@ -161,10 +158,15 @@ def test_PostE_censoring_excused_covariates():
         method = "censoring",
         parameters=SEQopts(weighted=True,
                            excused=True,
-                           excused_colnames=["ExcusedZero", "ExcusedOne"])
+                           excused_colnames=["excusedZero", "excusedOne"])
     )
-    assert s.covariates == "tx_init_bas+followup+followup_sq+trial+trial_sq+sex+N_bas+L_bas+P_bas+tx_init_bas*followup"
-    assert s.numerator == "sex+N_bas+L_bas+P_bas+followup+followup_sq+trial+trial_sq"
-    assert s.denominator == "sex+N+L+P+N_bas+L_bas+P_bas+followup+followup_sq+trial+trial_sq"
-    return
-'''
+    s.expand()
+    s.fit()
+    print(s.weight_stats)
+    print(s.numerator_model[0].summary())
+    print(s.numerator_model[1].summary())
+    print(s.denominator_model[0].summary())
+    print(s.denominator_model[1].summary())
+    matrix = s.outcome_model[0].summary()
+    return print(matrix)
+test_PostE_censoring_excused_coefs()

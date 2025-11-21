@@ -68,9 +68,9 @@ class SEQuential:
     def expand(self):
         start = time.perf_counter()
         kept = [self.cense_colname, self.cense_eligible_colname,
-                self.compevent_colname, 
-                self.subgroup_colname,
-                self.weight_eligible_colnames]
+                self.compevent_colname,
+                *self.weight_eligible_colnames,
+                *self.excused_colnames]
         
         self.data = self.data.with_columns([
             pl.when(pl.col(self.treatment_col).is_in(self.treatment_level))
@@ -105,7 +105,8 @@ class SEQuential:
         if self.method != "ITT":
             _dynamic(self)
         if self.selection_random:
-            _randomSelection(self.DT)
+            _randomSelection(self)
+            
         end = time.perf_counter()
         self.expansion_time = _format_time(start, end)
                     
@@ -118,13 +119,13 @@ class SEQuential:
             else:
                 raise ValueError(f"Unknown argument: {key}")
         
-        rng = np.random.RandomState(self.seed) if self.seed is not None else np.random
+        self._rng = np.random.RandomState(self.seed) if self.seed is not None else np.random
         UIDs = self.DT.select(pl.col(self.id_col)).unique().to_series().to_list()
         NIDs = len(UIDs)
         
         self._boot_samples = []
         for _ in range(self.bootstrap_nboot):
-            sampled_IDs = rng.choice(UIDs, size=int(self.bootstrap_sample * NIDs), replace=True)
+            sampled_IDs = self._rng.choice(UIDs, size=int(self.bootstrap_sample * NIDs), replace=True)
             id_counts = Counter(sampled_IDs)
             self._boot_samples.append(id_counts)
         return self
@@ -153,7 +154,6 @@ class SEQuential:
             WDT = _weight_predict(self, WDT)
             _weight_bind(self, WDT)
             self.weight_stats = _weight_stats(self)
-            self.DT.write_csv("test.csv")
         
         end = time.perf_counter()
         self.model_time = _format_time(start, end)

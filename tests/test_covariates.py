@@ -82,7 +82,7 @@ def test_PreE_censoring_covariates():
     )
     assert s.covariates == "tx_init_bas+followup+followup_sq+trial+trial_sq+sex"
     assert s.numerator == "sex+time+time_sq"
-    assert s.denominator == "ssex+N+L+P+time+time_sq"
+    assert s.denominator == "sex+N+L+P+time+time_sq"
     return
 
 def test_PostE_censoring_covariates():

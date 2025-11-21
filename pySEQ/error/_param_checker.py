@@ -7,11 +7,11 @@ def _param_checker(self):
     if self.followup_max is None:
         self.followup_max = self.data.select(self.time_col).to_series().max()   
     
-    if self.excused_colnames is None and self.excused:
+    if len(self.excused_colnames) == 0 and self.excused:
         self.excused = False
         raise Warning("Excused column names not provided but excused is set to True. Automatically set excused to False")
     
-    if self.excused_colnames is not None and not self.excused:
+    if len(self.excused_colnames) > 0 and not self.excused:
         self.excused = True
         raise Warning("Excused column names provided but excused is set to False. Automatically set excused to True")
     
