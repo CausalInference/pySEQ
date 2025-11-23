@@ -21,7 +21,7 @@ class SEQopts:
     followup_include: bool = True
     followup_max: int = None
     followup_min: int = 0
-    followup_spline: bool = False #TODO
+    followup_spline: bool = False
     hazard: bool = False # TODO
     indicator_baseline: str = "_bas"
     indicator_squared: str = "_sq"
