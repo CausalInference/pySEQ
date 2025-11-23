@@ -9,7 +9,7 @@ from .SEQopts import SEQopts
 from .error import _param_checker
 from .helpers import _col_string, bootstrap_loop, _format_time
 from .initialization import _outcome, _numerator, _denominator, _cense_numerator, _cense_denominator
-from .expansion import _mapper, _binder, _dynamic, _random_selection
+from .expansion import _binder, _dynamic, _random_selection
 from .weighting import _weight_setup, _fit_LTFU, _fit_numerator, _fit_denominator, _weight_bind, _weight_predict, _weight_stats
 from .analysis import _outcome_fit, _pred_risk, _calculate_survival, _subgroup_fit, _calculate_hazard
 from .plot import _survival_plot
