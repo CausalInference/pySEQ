@@ -1,6 +1,4 @@
 import polars as pl
-import numpy as np
-from ..helpers import _predict_model
 
 def _get_outcome_predictions(self, TxDT, idx=None):
     data = TxDT.to_pandas()
