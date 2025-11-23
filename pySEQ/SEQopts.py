@@ -37,7 +37,7 @@ class SEQopts:
     selection_first_trial: bool = False
     selection_probability: float = 0.8
     selection_random: bool = False
-    subgroup_colname: str = None #TODO
+    subgroup_colname: str = None
     treatment_level: List[int] = field(default_factory=lambda: [0, 1])
     trial_include: bool = True
     weight_eligible_colnames: List[str] = field(default_factory=lambda: [])
