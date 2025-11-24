@@ -19,6 +19,7 @@ def test_regular_survival():
     s.expand()
     s.fit()
     s.survival()
+    return
     
 def test_bootstrapped_survival():
     data = load_data("SEQdata")
@@ -40,6 +41,7 @@ def test_bootstrapped_survival():
     s.bootstrap()
     s.fit()
     s.survival()
+    return
 
 def test_subgroup_survival():
     data = load_data("SEQdata")
@@ -60,6 +62,7 @@ def test_subgroup_survival():
     s.expand()
     s.fit()
     s.survival()
+    return
     
 def test_subgroup_bootstrapped_survival():
     data = load_data("SEQdata")
@@ -82,6 +85,7 @@ def test_subgroup_bootstrapped_survival():
     s.bootstrap()
     s.fit()
     s.survival()
+    return
 
 def test_compevent():
     data = load_data("SEQdata_LTFU")
@@ -103,6 +107,7 @@ def test_compevent():
     s.expand()
     s.fit()
     s.survival()
+    return
     
 def test_bootstrapped_compevent():
     data = load_data("SEQdata_LTFU")
@@ -126,6 +131,7 @@ def test_bootstrapped_compevent():
     s.bootstrap()
     s.fit()
     s.survival()
+    return
     
 def test_subgroup_compevent():
     data = load_data("SEQdata_LTFU")
@@ -149,3 +155,4 @@ def test_subgroup_compevent():
     s.bootstrap()
     s.fit()
     s.survival()
+    return
