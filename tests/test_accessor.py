@@ -2,9 +2,10 @@ from pySEQTarget import SEQuential, SEQopts
 from pySEQTarget.data import load_data
 import pytest
 
+
 def test_ITT_collector():
     data = load_data("SEQdata")
-    
+
     s = SEQuential(
         data,
         id_col="ID",
@@ -14,8 +15,8 @@ def test_ITT_collector():
         outcome_col="outcome",
         time_varying_cols=["N", "L", "P"],
         fixed_cols=["sex"],
-        method = "ITT",
-        parameters=SEQopts()
+        method="ITT",
+        parameters=SEQopts(),
     )
     s.expand()
     s.fit()
