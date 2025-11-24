@@ -6,22 +6,23 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = "SEQuential"
-copyright = "2024, Ryan O'Dea, Alejandro Szmulewicz"
-author = "Ryan O'Dea, Alejandro Szmulewicz"
-release = "0.1.0"
+project = 'pySEQTarget'
+copyright = "2025, Ryan O'Dea, Alejandro Szmulewicz, Tom Palmer, Miguel Hernan"
+author = "Ryan O'Dea, Alejandro Szmulewicz, Tom Palmer, Miguel Hernan"
+release = '0.9.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = []
 
-templates_path = ["_templates"]
+templates_path = ['_templates']
 exclude_patterns = []
+
 
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = "alabaster"
-html_static_path = ["_static"]
+html_theme = 'alabaster'
+html_static_path = ['_static']
