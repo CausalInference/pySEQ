@@ -1,6 +1,7 @@
 from functools import wraps
 from concurrent.futures import ProcessPoolExecutor, as_completed
 import polars as pl
+import numpy as np
 from tqdm import tqdm
 import copy
 import time
@@ -23,6 +24,19 @@ def _prepare_boot_data(self, data, boot_id):
     
     return bootstrapped
 
+def _bootstrap_worker(obj, method_name, original_DT, i, seed, args, kwargs):
+    obj = copy.deepcopy(obj)
+    obj._rng = np.random.RandomState(seed + i) if seed is not None else np.random.RandomState()
+    obj.DT = _prepare_boot_data(obj, original_DT, i)
+    
+    # Disable bootstrapping to prevent recursion
+    obj.bootstrap_nboot = 0
+    
+    method = getattr(obj, method_name)
+    result = method(*args, **kwargs)
+    obj._rng = None
+    return result
+
 def bootstrap_loop(method):
     @wraps(method)
     def wrapper(self, *args, **kwargs):
@@ -38,17 +52,22 @@ def bootstrap_loop(method):
             original_DT = self.DT
             nboot = self.bootstrap_nboot
             ncores = self.ncores
+            seed = getattr(self, "seed", None)
+            method_name = method.__name__
             
-            def _worker(i):
-                obj = copy.deepcopy(self)
-                obj.DT = _prepare_boot_data(obj, original_DT, i)
-                return method(obj, *args, **kwargs)
-
             if getattr(self, "parallel", False):
+                original_rng = getattr(self, "_rng", None)
+                self._rng = None
+                
                 with ProcessPoolExecutor(max_workers=ncores) as executor:
-                    futures = [executor.submit(_worker, i) for i in range(nboot)]
+                    futures = [
+                        executor.submit(_bootstrap_worker, self, method_name, original_DT, i, seed, args, kwargs)
+                        for i in range(nboot)
+                    ]
                     for j in tqdm(as_completed(futures), total=nboot, desc="Bootstrapping..."):
                         results.append(j.result())
+                
+                self._rng = original_rng
             else:
                 for i in tqdm(range(nboot), desc="Bootstrapping..."):
                     self.DT = _prepare_boot_data(self, original_DT, i)
