@@ -6,10 +6,10 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'pySEQTarget'
+project = "pySEQTarget"
 copyright = "2025, Ryan O'Dea, Alejandro Szmulewicz, Tom Palmer, Miguel Hernan"
 author = "Ryan O'Dea, Alejandro Szmulewicz, Tom Palmer, Miguel Hernan"
-release = '0.9.0'
+release = "0.9.0"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
