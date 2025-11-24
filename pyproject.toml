@@ -6,8 +6,30 @@ build-backend = "setuptools.build_meta"
 name = "pySEQ"
 version = "0.9.0"
 description = "Sequentially Nested Target Trial Emulation"
-authors = [{name = "Ryan ODea", email = "ryan.odea@psi.ch"}]
+readme = "README.md"
+license = {text = "MIT"}
+keywords = ["causal inference", "sequential trial emulation", "target trial", "observational studies"]
 requires-python = ">=3.10"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12"
+]
+
+authors = [
+    {name = "Ryan O'Dea", email = "ryan.odea@psi.ch"},
+    {name = "Alejandro Szmulewicz", email = "aszmulewicz@hsph.harvard.edu"},
+    {name = "Tom Palmer", email = "tom.palmer@bristol.ac.uk"},
+    {name = "Miguel Hernan", email = "mhernan@hsph.harvard.edu"},
+]
+
+maintainers = [
+    {name = "Ryan O'Dea", email = "ryan.odea@psi.ch"},
+]
+
 dependencies = [
     "numpy",
     "polars",
@@ -18,10 +40,22 @@ dependencies = [
     "lifelines"
 ]
 
-[tools.setuptools]
+[project.urls]
+Homepage = "https://github.com/CausalInference/pySEQ"
+Repository = "https://github.com/CausalInference/pySEQ"
+"Bug Tracker" = "https://github.com/CausalInference/pySEQ/issues"
+
+"Ryan O'Dea (ORCID)" = "https://orcid.org/0009-0000-0103-9546"
+"Alejandro Szmulewicz (ORCID)" = "https://orcid.org/0000-0002-2664-802X"
+"Tom Palmer (ORCID)" = "https://orcid.org/0000-0003-4655-4511"
+"Miguel Hernan (ORCID)" = "https://orcid.org/0000-0003-1619-8456"
+"University of Bristol (ROR)" = "https://ror.org/0524sp257"
+"Harvard University (ROR)" = "https://ror.org/03vek6s52"
+
+[tool.setuptools]
 packages = ["pySEQ", "pySEQ.data"]
 
-[tools.setuptools.package-data]
+[tool.setuptools.package-data]
 SEQdata = ["data/*.csv"]
 
 [tool.pytest.ini_options]
