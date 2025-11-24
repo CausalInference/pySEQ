@@ -216,7 +216,7 @@ class SEQuential:
             "numerator_model", "denominator_model",
             "outcome_model",
             "hazard_ratio", "risk_estimates",
-            "km_data", "diagnostics", 
+            "km_data", "km_graph", "diagnostics", 
             "_survival_time", "_hazard_time", 
             "_model_time", "_expansion_time",
             "weight_stats"

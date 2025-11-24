@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List, Optional, Literal
 from .SEQopts import SEQopts
-import statsmodels.formula.api as smf
+from statsmodels.base.wrapper import ResultsWrapper
 import polars as pl
 import matplotlib.figure
 
@@ -9,10 +9,10 @@ import matplotlib.figure
 class SEQoutput:
     options: SEQopts = None
     method: str = None
-    numerator_models: List[smf.MNLogit] = None
-    denominator_models: List[smf.MNLogit] = None
-    outcome_models: List[List[smf.glm]] = None
-    compevent_models: List[List[smf.glm]] = None
+    numerator_models: List[ResultsWrapper] = None
+    denominator_models: List[ResultsWrapper] = None
+    outcome_models: List[List[ResultsWrapper]] = None
+    compevent_models: List[List[ResultsWrapper]] = None
     weight_statistics: dict = None
     hazard: pl.DataFrame = None
     km_data: pl.DataFrame = None
@@ -78,7 +78,7 @@ class SEQoutput:
             case _:
                 data = self.km_data
         if data is None:
-            ValueError("Data {type} was not created in the SEQuential process")
+            raise ValueError("Data {type} was not created in the SEQuential process")
         return data
                 
         
