@@ -1,5 +1,5 @@
-from pySEQ.data import load_data
-from pySEQ import SEQuential, SEQopts
+from pySEQTarget.data import load_data
+from pySEQTarget import SEQuential, SEQopts
 
 def test_ITT_covariates():
     data = load_data("SEQdata")

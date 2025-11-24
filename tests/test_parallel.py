@@ -1,5 +1,5 @@
-from pySEQ import SEQuential, SEQopts
-from pySEQ.data import load_data
+from pySEQTarget import SEQuential, SEQopts
+from pySEQTarget.data import load_data
 import os
 import pytest
 
