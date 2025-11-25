@@ -19,7 +19,7 @@ def _random_selection(self):
 
     NIDs = len(UIDs)
     sample = self._rng.choice(
-        UIDs, size=int(self.selection_probability * NIDs), replace=False
+        UIDs, size=int(self.selection_sample * NIDs), replace=False
     )
 
     self.DT = (
