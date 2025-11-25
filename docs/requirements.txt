@@ -10,3 +10,4 @@ statsmodels
 matplotlib
 pyarrow
 lifelines
+pySEQTarget
