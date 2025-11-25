@@ -1,5 +1,9 @@
-[![PyPI version](https://badge.fury.io/py/pySEQTarget.svg)](https://pypi.org/project/pySEQTarget) [![Downloads](https://static.pepy.tech/badge/pySEQTarget)](https://pepy.tech/project/pySEQTarget)[![codecov](https://codecov.io/gh/CausalInference/pySEQTarget/graph/badge.svg?token=DMOVJJUWXP)](https://codecov.io/gh/CausalInference/pySEQTarget)[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)![versions](https://img.shields.io/pypi/pyversions/pySEQTarget.svg)
 # pySEQTarget - Sequentially Nested Target Trial Emulation
+[![PyPI version](https://badge.fury.io/py/pySEQTarget.svg)](https://pypi.org/project/pySEQTarget) 
+[![Downloads](https://static.pepy.tech/badge/pySEQTarget)](https://pepy.tech/project/pySEQTarget)
+[![codecov](https://codecov.io/gh/CausalInference/pySEQTarget/graph/badge.svg?token=DMOVJJUWXP)](https://codecov.io/gh/CausalInference/pySEQTarget)[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+![versions](https://img.shields.io/pypi/pyversions/pySEQTarget.svg)
+[![Documentation Status](https://readthedocs.org/projects/pySEQTarget/badge/?version=latest)](https://pySEQTarget.readthedocs.io)
 
 Implementation of sequential trial emulation for the analysis of
 observational databases. The `SEQTaRget` software accommodates

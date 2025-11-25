@@ -173,8 +173,8 @@ class SEQopts:
             raise ValueError("bootstrap_sample must be between 0 and 1.")
         if not (0.0 < self.bootstrap_CI < 1.0):
             raise ValueError("bootstrap_CI must be between 0 and 1.")
-        if not (0.0 <= self.selection_probability <= 1.0):
-            raise ValueError("selection_probability must be between 0 and 1.")
+        if not (0.0 <= self.selection_sample <= 1.0):
+            raise ValueError("selection_sample must be between 0 and 1.")
 
         if self.plot_type not in ["risk", "survival", "incidence"]:
             raise ValueError(
