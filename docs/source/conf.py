@@ -5,11 +5,18 @@
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
+import os
+import sys
+from datetime import date
+import importlib.metadata
+
+version = importlib.metadata.version("pySEQTarget")
+sys.path.insert(0, os.path.abspath("../"))
 
 project = "pySEQTarget"
-copyright = "2025, Ryan O'Dea, Alejandro Szmulewicz, Tom Palmer, Miguel Hernan"
+copyright = f"{date.today().year}, Ryan O'Dea, Alejandro Szmulewicz, Tom Palmer, Miguel Hernan"
 author = "Ryan O'Dea, Alejandro Szmulewicz, Tom Palmer, Miguel Hernan"
-release = "0.9.0"
+release = version
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -18,7 +25,16 @@ extensions = [
     "sphinx.ext.duration",
     "sphinx.ext.doctest",
     "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.intersphinx",
+    "sphinx_copybutton",
+    "sphinx_autodoc_typehints",
+    "myst_parser"
 ]
+
+intersphinx_mapping = {
+    "py": ("https://docs.python.org/3", None)
+}
 
 templates_path = ["_templates"]
 exclude_patterns = []
@@ -27,5 +43,5 @@ exclude_patterns = []
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = "alabaster"
+html_theme = "piccolo_theme"
 html_static_path = ["_static"]
