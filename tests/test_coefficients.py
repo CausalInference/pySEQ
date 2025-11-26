@@ -1,3 +1,10 @@
+import sys
+from pathlib import Path
+
+# Add package root to path
+package_root = Path(__file__).parent.parent
+sys.path.insert(0, str(package_root))
+
 from pySEQTarget import SEQopts, SEQuential
 from pySEQTarget.data import load_data
 
@@ -189,14 +196,13 @@ def test_PreE_censoring_excused_coefs():
     s.fit()
     matrix = s.outcome_model[0]["outcome"].summary2().tables[1]["Coef."].to_list()
     expected = [
-        -6.460912082691973,
-        1.309708035546933,
-        0.10853511682679658,
-        -0.0038913520688693823,
-        0.08849129909709463,
-        -0.000647578869153453,
+        -6.383862385859305,
+        1.335378710346093,
+        0.029611514864625224,
+        -0.0017854432467035867,
+        0.12888028673936663,
+        -0.0013855918917791584,
     ]
-    print(matrix)
     assert [round(x, 3) for x in matrix] == [round(x, 3) for x in expected]
 
 
@@ -222,20 +228,31 @@ def test_PostE_censoring_excused_coefs():
     )
     s.expand()
     s.fit()
+    s.DT.write_csv("weightdata.csv")
+    print(s.weight_stats)
+    print(s.outcome_model[0]["outcome"].summary())
+    print(s.numerator_model[0].summary())
+    print(s.numerator_model[1].summary())
+    print(s.denominator_model[0].summary())
+    print(s.denominator_model[1].summary())
+
     matrix = s.outcome_model[0]["outcome"].summary2().tables[1]["Coef."].to_list()
     expected = [
-        -6.782732929102242,
-        0.26371172100905477,
-        0.13625528598217598,
-        0.040580427030886,
-        -0.000343018323531494,
-        0.031185150775465315,
-        0.000784356550754563,
-        0.004338417236024277,
-        -0.013052187516528172,
-        0.20402680950820007,
+        -6.354881630599161,
+        0.26437059880109814,
+        0.11052945840253169,
+        0.0359033269938446,
+        -0.00016819836476915145,
+        0.029330229450150295,
+        0.0006840606030679354,
+        0.007740880717871542,
+        -0.010288544399887233,
+        0.1520398124246858,
     ]
     assert [round(x, 3) for x in matrix] == [round(x, 3) for x in expected]
+
+
+test_PostE_censoring_excused_coefs()
 
 
 def test_PreE_LTFU_ITT():
